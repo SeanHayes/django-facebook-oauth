@@ -1,5 +1,11 @@
 Django Application for integrating Facebook Graph api.
 
+Authentication backend is created which can be used to authenticateai Facebook users using the
+django plugabble authentication system.
+
+Also, for every user a Django Auth user is created which can be used to give a login credentials
+other then facebook to the users too. Hence both the auth mechanism can work hand in hand.
+
 
 Requires:
 facebook.py (Facebook Python Graph API SDK) 
@@ -7,6 +13,12 @@ available with this distribution
 
 
 setting.py
+
+INSTALLED_APPS += (
+'django.contrib.auth',
+'django.contrib.sessions',
+)
+
 FACEBOOK_API_KEY=
 FACEBOOK_APP_ID=
 FACEBOOK_SECRET_KEY=
