@@ -1,0 +1,7 @@
+Djago Application for integrating Facebook Graph api.
+
+
+Requires:
+facebook.py (Facebook Python Graph API SDK) 
+available with this distribution
+
