@@ -1,0 +1,41 @@
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/codebase/!svn/ver/56272/search/products/travel/goibibo/stable/2.0/fb
+END
+views.py
+K 25
+svn:wc:ra_dav:version-url
+V 78
+/codebase/!svn/ver/56232/search/products/travel/goibibo/stable/2.0/fb/views.py
+END
+__init__.py
+K 25
+svn:wc:ra_dav:version-url
+V 81
+/codebase/!svn/ver/56232/search/products/travel/goibibo/stable/2.0/fb/__init__.py
+END
+auth.py
+K 25
+svn:wc:ra_dav:version-url
+V 77
+/codebase/!svn/ver/56272/search/products/travel/goibibo/stable/2.0/fb/auth.py
+END
+tests.py
+K 25
+svn:wc:ra_dav:version-url
+V 78
+/codebase/!svn/ver/56232/search/products/travel/goibibo/stable/2.0/fb/tests.py
+END
+models.py
+K 25
+svn:wc:ra_dav:version-url
+V 79
+/codebase/!svn/ver/56232/search/products/travel/goibibo/stable/2.0/fb/models.py
+END
+urls.py
+K 25
+svn:wc:ra_dav:version-url
+V 77
+/codebase/!svn/ver/56232/search/products/travel/goibibo/stable/2.0/fb/urls.py
+END
