@@ -5,3 +5,10 @@ Requires:
 facebook.py (Facebook Python Graph API SDK) 
 available with this distribution
 
+
+setting.py
+FACEBOOK_API_KEY=
+FACEBOOK_APP_ID=
+FACEBOOK_SECRET_KEY=
+
+AUTHENTICATION_BACKENDS =  ('django.contrib.auth.backends.ModelBackend','fb.auth.FbAuth')
