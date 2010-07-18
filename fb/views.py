@@ -3,15 +3,16 @@ from datetime import datetime
 import hashlib,pdb
 import urllib
 import time
-
+import urllib2
 from django.contrib.auth import authenticate, login
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect,HttpResponse
 from django.conf import settings
 
 
 def fb_auth(request):
 	v_code = request.GET.get('code')
 	APP_ID = settings.FACEBOOK_APP_ID
+	FB_P=settings.FB_PERM
 
 	if 'fbs_' + APP_ID in request.COOKIES:
 		user = authenticate(cookies=request.COOKIES)
@@ -23,17 +24,24 @@ def fb_auth(request):
 		if user:
 			login(request, user)
 		access_token = user.facebook.select_related()[0].access_token
-		set_cookie(request, "fbs_"+APP_ID, str(user.username),access_token=access_token,expires=time.time() + 30 * 86400)
-		return HttpResponseRedirect("/")
+		if request.META.has_key('HTTP_REFERER'):
+			url = request.META['HTTP_REFERER']
+			resp=HttpResponseRedirect(urllib2.unquote(url))
+
+		else:
+			resp=HttpResponseRedirect("http://goibibo.ibibo.com")
+		resp=set_cookie(resp, "fbs_"+APP_ID, str(user.username),access_token=access_token,expires=time.time() + 30 * 86400)
+		return resp
 	else:
 		ur = 'http://' + request.get_host() + request.get_full_path()
-		args = dict(client_id=APP_ID, redirect_uri=ur)
+		perm=",".join(FB_P)
+		args = dict(client_id=APP_ID, redirect_uri=ur, scope=perm)
 		return HttpResponseRedirect("https://graph.facebook.com/oauth/authorize?" + urllib.urlencode(args))
 
 
-def set_cookie(request, name, value, access_token=None, domain=None, path="/", expires=None):
+def set_cookie(resp, name, value, access_token=None, domain=None, path="/", expires=None):
 	"""Generates and signs a cookie for the give name/value"""
-	expires = str(int(time.time()))
+	expires = str(int(time.time())+21600000)
 	args = {}
 	args['expires'] = expires
 	args['uid'] = value
@@ -41,7 +49,8 @@ def set_cookie(request, name, value, access_token=None, domain=None, path="/", e
 		args['access_token'] = access_token
 	signature = cookie_signature(args)
 	args['sig'] = signature
-	request.COOKIES[name] = urllib.urlencode(args)
+	resp.set_cookie(name,urllib.urlencode(args),path="/",domain="goibibo.ibibo.com",expires=str(int(time.time())+21600000))
+	return resp
 
 def cookie_signature(parts):
 	"""Generates a cookie signature.
@@ -51,6 +60,6 @@ def cookie_signature(parts):
 	"""
 	payload = ''
 	for part in sorted(parts.keys()):
-		payload += parts[part]
+		payload += part+"="+parts[part]
 	payload += settings.FACEBOOK_SECRET_KEY
 	return hashlib.md5(payload).hexdigest()	
