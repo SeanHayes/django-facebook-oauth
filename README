@@ -24,3 +24,10 @@ FACEBOOK_APP_ID=
 FACEBOOK_SECRET_KEY=
 
 AUTHENTICATION_BACKENDS =  ('django.contrib.auth.backends.ModelBackend','fb.auth.FbAuth')
+
+FB_PERM = ["publish_stream","offline_access","user_location","user_birthday","email"]
+(this settings is used to pull various fb extended permissions while authenticating with facebook oauth. please check.
+http://developers.facebook.com/docs/authentication/permissions)
+
+
+
