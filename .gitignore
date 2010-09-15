@@ -1,0 +1,11 @@
+*.pyc
+*.pyo
+.settings/
+*.pid
+*.log
+*.db
+.pydevproject
+.project
+local_settings.py
+*~
+site_media/items/

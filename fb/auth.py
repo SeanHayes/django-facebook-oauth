@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User, check_password
 
 from datetime import datetime
-from travelibibo import settings
+from django.conf import settings
 import facebook
 import pdb
 import urllib,urllib2
@@ -10,7 +10,9 @@ from models import FacebookUser
 
 from settings import FACEBOOK_APP_ID as APP_ID
 from settings import FACEBOOK_SECRET_KEY as APP_SECRET
-
+from django.core.urlresolvers import reverse
+from django.contrib.sites.models import Site
+import logging
 
 class FbAuth:
 	"""
@@ -31,10 +33,14 @@ class FbAuth:
 			id = access_token['uid']
 
 		elif verification_code:
-			ur = 'http://'+settings.HOST+'/fb/fb-auth/'
+			#ur = 'http://'+settings.HOST+'/fb/fb-auth/'
+			ur = 'http://%s%s' % (Site.objects.get_current().domain, reverse('fb_auth'))
+			logging.debug(ur)
+			
 			args = dict(client_id=APP_ID, redirect_uri=ur)
 			args["client_secret"] = APP_SECRET
 			args["code"] = verification_code
+			logging.debug(args)
 
 			ur = "http://graph.facebook.com/oauth/access_token?" + urllib.urlencode(args)
 
