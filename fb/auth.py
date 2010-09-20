@@ -52,8 +52,8 @@ class FbAuth:
 			fb_profile = graph.get_object('me')
 			id = fb_profile['id']
 		
-		if(fb_profile):	
-			fb_user = self.updateDb(fb_profile,access_token)
+		if(fb_profile):
+			fb_user = self.updateDb(fb_profile,access_token['access_token'])
 			return fb_user.user
 		else:
 			return None
