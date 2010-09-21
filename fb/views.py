@@ -49,7 +49,9 @@ def set_cookie(resp, name, value, access_token=None, domain=None, path="/", expi
 		args['access_token'] = access_token
 	signature = cookie_signature(args)
 	args['sig'] = signature
-	resp.set_cookie(name,urllib.urlencode(args),path="/",domain="goibibo.ibibo.com",expires=str(int(time.time())+21600000))
+	#resp.set_cookie(name,urllib.urlencode(args),path="/",domain="goibibo.ibibo.com",expires=str(int(time.time())+21600000))
+	max_age = 365*24*60*60
+        resp.set_cookie(name,urllib.urlencode(args), max_age=max_age, expires=None, path='/', domain="goibibo.ibibo.com", secure=None)
 	return resp
 
 def cookie_signature(parts):
