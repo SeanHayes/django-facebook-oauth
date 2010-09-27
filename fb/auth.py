@@ -13,14 +13,15 @@ from settings import FACEBOOK_SECRET_KEY as APP_SECRET
 from django.core.urlresolvers import reverse
 from django.contrib.sites.models import Site
 import logging
+import json
 
 class FbAuth:
 	"""
 	Authenticate against the Facebook Authentication
-
+	
 	Use the login name, and a hash of the password. For example:
 	"""
-
+	
 	def authenticate(self,verification_code=None,cookies=[]):
 		access_token = None
 		fb_profile = None
@@ -29,58 +30,87 @@ class FbAuth:
 			if 'fbs_' + APP_ID in cookies and datetime.fromtimestamp(float(access_token['expires'])) > datetime.now():
 				graph = facebook.GraphAPI(access_token['access_token'])
 				fb_profile = graph.get_object('me')
-
+			
 			id = access_token['uid']
-
+		
 		elif verification_code:
 			#ur = 'http://'+settings.HOST+'/fb/fb-auth/'
-			ur = 'http://%s%s' % (Site.objects.get_current().domain, reverse('fb_auth'))
+			url = 'http://%s%s' % (Site.objects.get_current().domain, reverse('fb_auth'))
 			logging.debug(ur)
 			
-			args = dict(client_id=APP_ID, redirect_uri=ur)
+			args = dict(client_id=APP_ID, redirect_uri=url)
 			args["client_secret"] = APP_SECRET
 			args["code"] = verification_code
 			logging.debug(args)
-
-			ur = "http://graph.facebook.com/oauth/access_token?" + urllib.urlencode(args)
-
-			response = urllib2.urlopen(ur).read()
+			
+			url = "http://graph.facebook.com/oauth/access_token?" + urllib.urlencode(args)
+			
+			response = urllib2.urlopen(url).read()
 			atoken = response.split('&')[0].split('=')[-1]
 			access_token = atoken
-
+			
 			graph = facebook.GraphAPI(access_token)
 			fb_profile = graph.get_object('me')
 			id = fb_profile['id']
+			
 		
 		if(fb_profile):
-			fb_user = self.updateDb(fb_profile,access_token['access_token'])
+			fb_user = self.updateDb(fb_profile, access_token['access_token'])
+			logging.debug('FB User: %s' % fb_user)
 			return fb_user.user
 		else:
 			return None
-
-	def updateDb(self,fb_profile,access_token):
+	
+	def updateDb(self, fb_profile, access_token):
+		logging.debug(fb_profile)
+		#TODO: check for admin:
+		is_admin = False
+		try:
+			url = 'https://api.facebook.com/method/fql.query?format=json&query=SELECT%%20application_id%%20FROM%%20developer%%20WHERE%%20developer_id%%20=%%20%s&access_token=%s' % (fb_profile['id'], access_token)
+			
+			apps = json.loads(urllib2.urlopen(url).read())
+			
+			for app in apps:
+				if app['application_id'] == APP_ID:
+					is_admin = True
+					break
+		except Exception:
+			pass
+		
+		try:
+			fb_user = FacebookUser.objects.get(uid=fb_profile['id'])
+			user = fb_user.user
+			user.is_staff = is_admin
+			user.is_superuser = is_admin
+			user.save()
+		except FacebookUser.DoesNotExist as e:
+			#logging.debug('%s' % e)
 			try:
-				fb_user = FacebookUser.objects.get(uid=fb_profile['id'])
-			except FacebookUser.DoesNotExist:
-				try:
-					email = fb_profile['email']
-				except:
-					email = fb_profile['id'] + '@dummyfbemail.com'
-
-				user = User.objects.create(username=fb_profile['id'], email=email)
-				user.first_name = fb_profile['first_name']
-				user.last_name = fb_profile['last_name']
-				user.save()
-				
-				fb_user = FacebookUser(user=user,uid=str(fb_profile["id"]),
-					name=fb_profile["name"],
-					access_token=access_token,
-					url=fb_profile["link"])
-				fb_user.save()
-
-			return fb_user
-
-
+				email = fb_profile['email']
+			except:
+				email = fb_profile['id'] + '@dummyfbemail.com'
+			
+			user = User(
+				username=fb_profile['id'],
+				email=email,
+				first_name=fb_profile['first_name'],
+				last_name=fb_profile['last_name'])
+			user.set_unusable_password()
+			user.is_staff = is_admin
+			user.is_superuser = is_admin
+			user.save()
+			
+			fb_user = FacebookUser(
+				user=user,
+				uid=str(fb_profile["id"]),
+				name=fb_profile["name"],
+				access_token=access_token,
+				url=fb_profile["link"])
+			fb_user.save()
+			logging.debug('FB User: %s' % fb_user)
+		
+		return fb_user
+	
 	def get_user(self, user_id):
 		try:
 			return User.objects.get(pk=user_id)
