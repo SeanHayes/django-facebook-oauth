@@ -22,7 +22,7 @@ class FbAuth(ModelBackend):
 	Use the login name, and a hash of the password. For example:
 	"""
 	
-	def authenticate(self,verification_code=None,cookies=[]):
+	def authenticate(self, verification_code=None, cookies=[]):
 		access_token = None
 		fb_profile = None
 		if(cookies):
@@ -36,7 +36,7 @@ class FbAuth(ModelBackend):
 		elif verification_code:
 			#url = 'http://'+settings.HOST+'/fb/fb-auth/'
 			url = 'http://%s%s' % (Site.objects.get_current().domain, reverse('fb_auth'))
-			logging.debug(ur)
+			logging.debug(url)
 			
 			args = dict(client_id=APP_ID, redirect_uri=url)
 			args["client_secret"] = APP_SECRET
@@ -44,8 +44,9 @@ class FbAuth(ModelBackend):
 			logging.debug(args)
 			
 			url = "http://graph.facebook.com/oauth/access_token?" + urllib.urlencode(args)
-			
+			logging.debug('Access Token URL: %s' % url)
 			response = urllib2.urlopen(url).read()
+			logging.debug('response: %s' % response)
 			atoken = response.split('&')[0].split('=')[-1]
 			access_token = atoken
 			
@@ -55,14 +56,19 @@ class FbAuth(ModelBackend):
 			
 		
 		if(fb_profile):
-			fb_user = self.updateDb(fb_profile, access_token['access_token'])
-			#logging.debug('FB User: %s' % fb_user)
+			#logging.debug('fb_profile: %s' % fb_profile)
+			if type(access_token) == dict:
+				access_token = access_token['access_token']
+			logging.debug('Access Token: %s' % access_token)
+			fb_user = self.updateDb(fb_profile, access_token)
+			logging.debug('FB User: %s' % fb_user)
 			return fb_user.user
 		else:
 			return None
 	
 	def updateDb(self, fb_profile, access_token):
 		#logging.debug(fb_profile)
+		#logging.debug('Access Token: %s' % access_token)
 		#TODO: check for admin:
 		is_admin = False
 		try:
@@ -76,16 +82,17 @@ class FbAuth(ModelBackend):
 					break
 		except Exception:
 			pass
-		#logging.debug('Admin status: %s' % is_admin)
+		logging.debug('Admin status: %s' % is_admin)
 		
 		try:
 			fb_user = FacebookUser.objects.get(uid=fb_profile['id'])
+			#should the access_token be updated?
 			user = fb_user.user
 			user.is_staff = is_admin
 			user.is_superuser = is_admin
 			user.save()
 		except FacebookUser.DoesNotExist as e:
-			#logging.debug('%s' % e)
+			logging.debug('%s' % e)
 			try:
 				email = fb_profile['email']
 			except:

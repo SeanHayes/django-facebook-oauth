@@ -16,7 +16,7 @@ def fb_auth(request):
 	v_code = request.GET.get('code')
 	APP_ID = settings.FACEBOOK_APP_ID
 	FB_P=settings.FB_PERM
-
+	
 	if 'fbs_' + APP_ID in request.COOKIES:
 		#logging.debug('fbs_')
 		user = authenticate(cookies=request.COOKIES)
@@ -24,7 +24,7 @@ def fb_auth(request):
 			login(request, user)
 		return HttpResponseRedirect("/")
 	elif(v_code):
-		#logging.debug('v_code')
+		logging.debug('v_code: %s' % v_code)
 		user = authenticate(verification_code=v_code)
 		if user:
 			login(request, user)
