@@ -10,8 +10,8 @@ from django.contrib.auth.backends import ModelBackend
 from django.core.urlresolvers import reverse
 from django.contrib.sites.models import Site
 from django.conf import settings
-from settings import FACEBOOK_APP_ID as APP_ID
-from settings import FACEBOOK_SECRET_KEY as APP_SECRET
+APP_ID = settings.FACEBOOK_APP_ID
+APP_SECRET = settings.FACEBOOK_SECRET_KEY
 import logging
 import json
 
