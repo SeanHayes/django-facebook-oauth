@@ -13,5 +13,7 @@ class FacebookUser(models.Model):
 	updated = models.DateTimeField(auto_now=True)
 	
 	def __unicode__(self):
-		return u'%s %s\'s Facebook Profile' % (self.user.first_name, self.user.last_name)
+		return u'%s\'s Facebook Profile' % (self.name)
 	
+	def natural_key(self):
+		return (self.uid)

@@ -1,21 +1,21 @@
-from django.contrib.auth.models import User, check_password
-
 from datetime import datetime
-from django.conf import settings
 import facebook
 import pdb
-import urllib,urllib2
+import urllib, urllib2
 
+from django.contrib.auth.models import User
 from models import FacebookUser
 
-from settings import FACEBOOK_APP_ID as APP_ID
-from settings import FACEBOOK_SECRET_KEY as APP_SECRET
+from django.contrib.auth.backends import ModelBackend
 from django.core.urlresolvers import reverse
 from django.contrib.sites.models import Site
+from django.conf import settings
+from settings import FACEBOOK_APP_ID as APP_ID
+from settings import FACEBOOK_SECRET_KEY as APP_SECRET
 import logging
 import json
 
-class FbAuth:
+class FbAuth(ModelBackend):
 	"""
 	Authenticate against the Facebook Authentication
 	
@@ -34,7 +34,7 @@ class FbAuth:
 			id = access_token['uid']
 		
 		elif verification_code:
-			#ur = 'http://'+settings.HOST+'/fb/fb-auth/'
+			#url = 'http://'+settings.HOST+'/fb/fb-auth/'
 			url = 'http://%s%s' % (Site.objects.get_current().domain, reverse('fb_auth'))
 			logging.debug(ur)
 			
@@ -56,13 +56,13 @@ class FbAuth:
 		
 		if(fb_profile):
 			fb_user = self.updateDb(fb_profile, access_token['access_token'])
-			logging.debug('FB User: %s' % fb_user)
+			#logging.debug('FB User: %s' % fb_user)
 			return fb_user.user
 		else:
 			return None
 	
 	def updateDb(self, fb_profile, access_token):
-		logging.debug(fb_profile)
+		#logging.debug(fb_profile)
 		#TODO: check for admin:
 		is_admin = False
 		try:
@@ -76,6 +76,7 @@ class FbAuth:
 					break
 		except Exception:
 			pass
+		#logging.debug('Admin status: %s' % is_admin)
 		
 		try:
 			fb_user = FacebookUser.objects.get(uid=fb_profile['id'])
@@ -107,12 +108,6 @@ class FbAuth:
 				access_token=access_token,
 				url=fb_profile["link"])
 			fb_user.save()
-			logging.debug('FB User: %s' % fb_user)
 		
 		return fb_user
 	
-	def get_user(self, user_id):
-		try:
-			return User.objects.get(pk=user_id)
-		except User.DoesNotExist:
-			return None
