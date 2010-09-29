@@ -48,7 +48,7 @@ class FbAuth(ModelBackend):
 			response = urllib2.urlopen(url).read()
 			logging.debug('response: %s' % response)
 			atoken = response.split('&')[0].split('=')[-1]
-			access_token = atoken
+			access_token = urllib.unquote(atoken)
 			
 			graph = facebook.GraphAPI(access_token)
 			fb_profile = graph.get_object('me')
