@@ -43,7 +43,7 @@ class FbAuth(ModelBackend):
 			args["code"] = verification_code
 			logging.debug(args)
 			
-			url = "http://graph.facebook.com/oauth/access_token?" + urllib.urlencode(args)
+			url = "https://graph.facebook.com/oauth/access_token?" + urllib.urlencode(args)
 			logging.debug('Access Token URL: %s' % url)
 			response = urllib2.urlopen(url).read()
 			logging.debug('response: %s' % response)
