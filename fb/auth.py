@@ -36,11 +36,11 @@ class FbAuth:
 			args["client_secret"] = APP_SECRET
 			args["code"] = verification_code
 
-			ur = "http://graph.facebook.com/oauth/access_token?" + urllib.urlencode(args)
+			ur = "https://graph.facebook.com/oauth/access_token?" + urllib.urlencode(args)
 
 			response = urllib2.urlopen(ur).read()
 			atoken = response.split('&')[0].split('=')[-1]
-			access_token = atoken
+			access_token = urllib2.unquote(atoken)
 
 			graph = facebook.GraphAPI(access_token)
 			fb_profile = graph.get_object('me')
