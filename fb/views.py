@@ -7,6 +7,7 @@ import urllib2
 from django.contrib.auth import authenticate, login
 from django.http import HttpResponseRedirect,HttpResponse
 from django.conf import settings
+import facebook
 
 
 def fb_auth(request):
@@ -47,6 +48,11 @@ def set_cookie(resp, name, value, access_token=None, domain=None, path="/", expi
 	args['uid'] = value
 	if(access_token):	
 		args['access_token'] = access_token
+		graph = facebook.GraphAPI(access_token)
+                graph=graph.get_object('me')
+		fname = graph['first_name']
+		args['fname']=fname
+
 	signature = cookie_signature(args)
 	args['sig'] = signature
 	#resp.set_cookie(name,urllib.urlencode(args),path="/",domain="goibibo.ibibo.com",expires=str(int(time.time())+21600000))
