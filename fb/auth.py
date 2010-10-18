@@ -71,9 +71,10 @@ class FbAuth(ModelBackend):
 	def updateDb(self, fb_profile, access_token):
 		#logger.debug(fb_profile)
 		#logger.debug('Access Token: %s' % access_token)
-		#TODO: check for admin:
+		#check if user is an app admin/developer
 		is_admin = False
 		try:
+			#returns a list of apps the user is a dev of
 			url = 'https://api.facebook.com/method/fql.query?format=json&query=SELECT%%20application_id%%20FROM%%20developer%%20WHERE%%20developer_id%%20=%%20%s&access_token=%s' % (fb_profile['id'], access_token)
 			
 			apps = json.loads(urllib2.urlopen(url).read())
@@ -88,11 +89,16 @@ class FbAuth(ModelBackend):
 		
 		try:
 			fb_user = FacebookUser.objects.get(uid=fb_profile['id'])
-			#should the access_token be updated?
+			#update access token if it's changed
+			if fb_user.access_token is not access_token:
+				fb_user.access_token = access_token
+				fb_user.save()
 			user = fb_user.user
-			user.is_staff = is_admin
-			user.is_superuser = is_admin
-			user.save()
+			#save if either value has changed
+			if user.is_staff is not is_admin or user.is_superuser is not is_admin:
+				user.is_staff = is_admin
+				user.is_superuser = is_admin
+				user.save()
 		except FacebookUser.DoesNotExist as e:
 			logger.debug('%s' % e)
 			try:
@@ -100,20 +106,15 @@ class FbAuth(ModelBackend):
 			except:
 				email = fb_profile['id'] + '@dummyfbemail.com'
 			
-			try:
-				user = User.objects.get(username=fb_profile['id'])
-				logger.debug('Found a User object')
-			except User.DoesNotExist:
-				logger.debug('Creating a User object')
-				user = User(
-					username=fb_profile['id'],
-					email=email,
-					first_name=fb_profile['first_name'],
-					last_name=fb_profile['last_name'])
-				user.set_unusable_password()
-				user.is_staff = is_admin
-				user.is_superuser = is_admin
-				user.save()
+			user = User(
+				username=fb_profile['id'],
+				email=email,
+				first_name=fb_profile['first_name'],
+				last_name=fb_profile['last_name'])
+			user.set_unusable_password()
+			user.is_staff = is_admin
+			user.is_superuser = is_admin
+			user.save()
 			
 			fb_user = FacebookUser(
 				user=user,
@@ -124,4 +125,4 @@ class FbAuth(ModelBackend):
 			fb_user.save()
 		
 		return fb_user
-	
+
