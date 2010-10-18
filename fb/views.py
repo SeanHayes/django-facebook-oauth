@@ -11,6 +11,7 @@ from django.core.urlresolvers import reverse
 import logging
 import urlparse
 from django.contrib.sites.models import Site
+import facebook
 
 def fb_auth(request):
 	v_code = request.GET.get('code')
@@ -68,6 +69,10 @@ def set_cookie(resp, name, value, access_token=None, domain=None, path="/", expi
 	args['uid'] = value
 	if(access_token):
 		args['access_token'] = access_token
+		graph = facebook.GraphAPI(access_token)
+		graph=graph.get_object('me')
+		fname = graph['first_name']
+		args['fname']=fname
 	
 	signature = cookie_signature(args)
 	args['sig'] = signature
