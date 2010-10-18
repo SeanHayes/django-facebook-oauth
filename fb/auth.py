@@ -14,6 +14,8 @@ APP_ID = settings.FACEBOOK_APP_ID
 APP_SECRET = settings.FACEBOOK_SECRET_KEY
 import logging
 import json
+from datetime import datetime
+import re
 
 logger = logging.getLogger(__name__)
 
@@ -106,8 +108,21 @@ class FbAuth(ModelBackend):
 			except:
 				email = fb_profile['id'] + '@dummyfbemail.com'
 			
+			username = fb_profile['id']
+			#we need a unique User created. Otherwise another user might be able
+			#to change his or her username to someone else's FB ID, thereby causing
+			#this script to crash and preventing that FB user from registering.
+			unique = False
+			while not unique:
+				try:
+					User.objects.get(username=username)
+					d = datetime.now()
+					username = re.sub(r'[-:.]', '', d.isoformat())
+				except User.DoesNotExist:
+					unique = True
+			
 			user = User(
-				username=fb_profile['id'],
+				username=username,
 				email=email,
 				first_name=fb_profile['first_name'],
 				last_name=fb_profile['last_name'])
