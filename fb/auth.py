@@ -15,6 +15,8 @@ APP_SECRET = settings.FACEBOOK_SECRET_KEY
 import logging
 import json
 
+logger = logging.getLogger(__name__)
+
 class FbAuth(ModelBackend):
 	"""
 	Authenticate against the Facebook Authentication
@@ -36,17 +38,17 @@ class FbAuth(ModelBackend):
 		elif verification_code:
 			#url = 'http://'+settings.HOST+'/fb/fb-auth/'
 			url = 'http://%s%s' % (Site.objects.get_current().domain, reverse('fb_auth'))
-			logging.debug(url)
+			logger.debug(url)
 			
 			args = dict(client_id=APP_ID, redirect_uri=url)
 			args["client_secret"] = APP_SECRET
 			args["code"] = verification_code
-			logging.debug(args)
+			logger.debug(args)
 			
 			url = "https://graph.facebook.com/oauth/access_token?" + urllib.urlencode(args)
-			logging.debug('Access Token URL: %s' % url)
+			logger.debug('Access Token URL: %s' % url)
 			response = urllib2.urlopen(url).read()
-			logging.debug('response: %s' % response)
+			logger.debug('response: %s' % response)
 			atoken = response.split('&')[0].split('=')[-1]
 			access_token = urllib.unquote(atoken)
 			
@@ -56,19 +58,19 @@ class FbAuth(ModelBackend):
 			
 		
 		if(fb_profile):
-			#logging.debug('fb_profile: %s' % fb_profile)
+			#logger.debug('fb_profile: %s' % fb_profile)
 			if type(access_token) == dict:
 				access_token = access_token['access_token']
-			logging.debug('Access Token: %s' % access_token)
+			logger.debug('Access Token: %s' % access_token)
 			fb_user = self.updateDb(fb_profile, access_token)
-			logging.debug('FB User: %s' % fb_user)
+			logger.debug('FB User: %s' % fb_user)
 			return fb_user.user
 		else:
 			return None
 	
 	def updateDb(self, fb_profile, access_token):
-		#logging.debug(fb_profile)
-		#logging.debug('Access Token: %s' % access_token)
+		#logger.debug(fb_profile)
+		#logger.debug('Access Token: %s' % access_token)
 		#TODO: check for admin:
 		is_admin = False
 		try:
@@ -80,9 +82,9 @@ class FbAuth(ModelBackend):
 				if app['application_id'] == APP_ID:
 					is_admin = True
 					break
-		except Exception:
-			pass
-		logging.debug('Admin status: %s' % is_admin)
+		except Exception as e:
+			logger.error(e)
+		logger.debug('Admin status: %s' % is_admin)
 		
 		try:
 			fb_user = FacebookUser.objects.get(uid=fb_profile['id'])
@@ -92,21 +94,26 @@ class FbAuth(ModelBackend):
 			user.is_superuser = is_admin
 			user.save()
 		except FacebookUser.DoesNotExist as e:
-			logging.debug('%s' % e)
+			logger.debug('%s' % e)
 			try:
 				email = fb_profile['email']
 			except:
 				email = fb_profile['id'] + '@dummyfbemail.com'
 			
-			user = User(
-				username=fb_profile['id'],
-				email=email,
-				first_name=fb_profile['first_name'],
-				last_name=fb_profile['last_name'])
-			user.set_unusable_password()
-			user.is_staff = is_admin
-			user.is_superuser = is_admin
-			user.save()
+			try:
+				user = User.objects.get(username=fb_profile['id'])
+				logger.debug('Found a User object')
+			except User.DoesNotExist:
+				logger.debug('Creating a User object')
+				user = User(
+					username=fb_profile['id'],
+					email=email,
+					first_name=fb_profile['first_name'],
+					last_name=fb_profile['last_name'])
+				user.set_unusable_password()
+				user.is_staff = is_admin
+				user.is_superuser = is_admin
+				user.save()
 			
 			fb_user = FacebookUser(
 				user=user,
