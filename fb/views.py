@@ -72,8 +72,10 @@ def set_cookie(resp, name, value, access_token=None, domain=None, path="/", expi
 	signature = cookie_signature(args)
 	args['sig'] = signature
 	#logging.debug(args)
-	resp.set_cookie(name, urllib.urlencode(args), path="/", domain=domain, expires=expires)
 	
+	#resp.set_cookie(name, urllib.urlencode(args), path="/", domain=domain, expires=expires)
+	max_age = 365*24*60*60
+	resp.set_cookie(name, urllib.urlencode(args), max_age=max_age, expires=None, path='/', domain=domain, secure=None)
 	return resp
 
 def cookie_signature(parts):

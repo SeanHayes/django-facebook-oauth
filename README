@@ -14,6 +14,8 @@ available with this distribution
 
 setting.py
 
+HOST = <full domain of application: ex "http://www.google.com">
+
 INSTALLED_APPS += (
 'django.contrib.auth',
 'django.contrib.sessions',
