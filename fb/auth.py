@@ -5,10 +5,10 @@ import urllib, urllib2
 
 from django.contrib.auth.models import User
 from models import FacebookUser
+from constants import HOST
 
 from django.contrib.auth.backends import ModelBackend
 from django.core.urlresolvers import reverse
-from django.contrib.sites.models import Site
 from django.conf import settings
 APP_ID = settings.FACEBOOK_APP_ID
 APP_SECRET = settings.FACEBOOK_SECRET_KEY
@@ -38,8 +38,7 @@ class FbAuth(ModelBackend):
 			id = access_token['uid']
 		
 		elif verification_code:
-			#url = 'http://'+settings.HOST+'/fb/fb-auth/'
-			url = 'http://%s%s' % (Site.objects.get_current().domain, reverse('fb_auth'))
+			url = 'http://%s%s' % (HOST, reverse('fb_auth'))
 			logger.debug(url)
 			
 			args = dict(client_id=APP_ID, redirect_uri=url)
