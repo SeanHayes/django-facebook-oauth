@@ -8,6 +8,7 @@ from django.contrib.auth import authenticate, login
 from django.http import HttpResponseRedirect,HttpResponse
 from django.conf import settings
 from django.core.urlresolvers import reverse
+from constants import HOST
 import logging
 import urlparse
 import facebook
@@ -45,20 +46,20 @@ def fb_auth(request):
 		try:
 			try:
 				from IPy import IP
-				IP(request.get_host().split(':')[0])
+				IP(HOST.split(':')[0])
 			except ImportError:
 				pass
 		except Exception as e:
 			logger.error(e)
-			domain = '.'+request.get_host()
+			domain = '.'+HOST
 			logger.debug('DOMAIN: '+domain)
 		resp=set_cookie(resp, "fbs_"+APP_ID, str(user.username), access_token=access_token, domain=domain, expires=time.time() + 30 * 86400)
 		return resp
 	else:
 		#logger.debug('last case')
-		ur = 'http://' + request.get_host() + request.get_full_path()
+		url = 'http://%s%s' % (HOST, request.get_full_path())
 		perm=",".join(FB_P)
-		args = dict(client_id=APP_ID, redirect_uri=ur, scope=perm)
+		args = dict(client_id=APP_ID, redirect_uri=url, scope=perm)
 		return HttpResponseRedirect("https://graph.facebook.com/oauth/authorize?" + urllib.urlencode(args))
 
 

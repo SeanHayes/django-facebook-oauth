@@ -48,15 +48,17 @@ class FbAuth(ModelBackend):
 			
 			url = "https://graph.facebook.com/oauth/access_token?" + urllib.urlencode(args)
 			logger.debug('Access Token URL: %s' % url)
-			response = urllib2.urlopen(url).read()
-			logger.debug('response: %s' % response)
-			atoken = response.split('&')[0].split('=')[-1]
-			access_token = urllib.unquote(atoken)
-			
-			graph = facebook.GraphAPI(access_token)
-			fb_profile = graph.get_object('me')
-			id = fb_profile['id']
-			
+			try:
+				response = urllib2.urlopen(url).read()
+				logger.debug('response: %s' % response)
+				atoken = response.split('&')[0].split('=')[-1]
+				access_token = urllib.unquote(atoken)
+				
+				graph = facebook.GraphAPI(access_token)
+				fb_profile = graph.get_object('me')
+				id = fb_profile['id']
+			except Exception as e:
+				logger.error(e)
 		
 		if(fb_profile):
 			#logger.debug('fb_profile: %s' % fb_profile)
