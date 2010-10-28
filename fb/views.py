@@ -57,7 +57,8 @@ def fb_auth(request):
 		return resp
 	else:
 		#logger.debug('last case')
-		url = 'http://%s%s' % (HOST, request.get_full_path())
+		url = 'http://%s%s' % (HOST, reverse('fb_auth'))
+		logger.debug(url)
 		perm=",".join(FB_P)
 		args = dict(client_id=APP_ID, redirect_uri=url, scope=perm)
 		return HttpResponseRedirect("https://graph.facebook.com/oauth/authorize?" + urllib.urlencode(args))

@@ -58,7 +58,7 @@ class FbAuth(ModelBackend):
 				fb_profile = graph.get_object('me')
 				id = fb_profile['id']
 			except Exception as e:
-				logger.error(e)
+				logger.exception(e)
 		
 		if(fb_profile):
 			#logger.debug('fb_profile: %s' % fb_profile)
