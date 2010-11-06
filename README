@@ -8,6 +8,7 @@ other then facebook to the users too. Hence both the auth mechanism can work han
 
 
 Requires:
+python 2.5+
 facebook.py (Facebook Python Graph API SDK) 
 available with this distribution
 

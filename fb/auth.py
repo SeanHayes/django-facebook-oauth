@@ -1,9 +1,8 @@
 from django.contrib.auth.models import User, check_password
 
 from datetime import datetime
-from travelibibo import settings
+from django.conf import settings
 import facebook
-import pdb
 import urllib,urllib2
 
 from models import FacebookUser
