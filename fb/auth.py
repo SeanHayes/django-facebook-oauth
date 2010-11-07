@@ -54,6 +54,14 @@ class FbAuth:
 	def updateDb(self,fb_profile,access_token):
 			try:
 				fb_user = FacebookUser.objects.get(uid=fb_profile['id'])
+				if fb_user:
+                                        try:
+                                                graph = facebook.GraphAPI(fb_user.access_token)
+                                                graph = graph.get_object('me')
+                                        except Exception,e:
+                                                fb_user.access_token = access_token
+                                                fb_user.save()
+
 			except FacebookUser.DoesNotExist:
 				try:
 					email = fb_profile['email']
