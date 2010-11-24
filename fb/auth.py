@@ -1,7 +1,8 @@
 from datetime import datetime
-import facebook
 import pdb
-import urllib, urllib2
+from django.conf import settings
+import facebook
+import urllib,urllib2
 
 from django.contrib.auth.models import User
 from models import FacebookUser
@@ -9,7 +10,6 @@ from constants import HOST
 
 from django.contrib.auth.backends import ModelBackend
 from django.core.urlresolvers import reverse
-from django.conf import settings
 APP_ID = settings.FACEBOOK_APP_ID
 APP_SECRET = settings.FACEBOOK_SECRET_KEY
 import logging
@@ -96,6 +96,14 @@ class FbAuth(ModelBackend):
 			if fb_user.access_token is not access_token:
 				fb_user.access_token = access_token
 				fb_user.save()
+			#TODO: decide whether to use the following try/catch from upstream or stick with previous 3 lines
+			#update access token if old one doesn't work
+			#try:
+			#	graph = facebook.GraphAPI(fb_user.access_token)
+			#	graph = graph.get_object('me')
+			#except Exception,e:
+			#	fb_user.access_token = access_token
+			#	fb_user.save()
 			user = fb_user.user
 			#save if either value has changed
 			if user.is_staff is not is_admin or user.is_superuser is not is_admin:
