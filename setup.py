@@ -26,6 +26,6 @@ setup(name='django-facebook-oauth',
 	url='https://github.com/vikalp/django-facebook-oauth',
 	license='BSD',
 	packages=['django_facebook_oauth'],
-	install_requires=['django', 'facebook'],
+	install_requires=['django', 'facebook-python-sdk'],
 )
 
