@@ -3,8 +3,8 @@ from django.core import mail
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login,logout
-from fb.views import *
-from fb.models import *
+from views import *
+from models import *
 import pdb
 
 class TestFb(TestCase):
