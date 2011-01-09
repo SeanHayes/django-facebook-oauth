@@ -42,4 +42,4 @@ add one url param:
 
 
 site url for facebook app:
-http://<hostname>/fb/fb-auth/
+http://yourdomain.com/fb/fb-auth/
