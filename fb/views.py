@@ -30,7 +30,7 @@ def fb_auth(request):
 			resp=HttpResponseRedirect(urllib2.unquote(url))
 
 		else:
-			resp=HttpResponseRedirect("http://goibibo.ibibo.com")
+			resp=HttpResponseRedirect("http://"+settings.SESSION_COOKIE_DOMAIN)
 		if(FB_P.count('offline_access')):
 			resp=set_cookie(resp, "fbs_"+APP_ID, str(user.username),access_token=access_token,expires=time.time() + 30 * 86400)
 		else:
@@ -58,9 +58,9 @@ def set_cookie(resp, name, value, access_token=None, domain=None, path="/", expi
 
 	signature = cookie_signature(args)
 	args['sig'] = signature
-	#resp.set_cookie(name,urllib.urlencode(args),path="/",domain="goibibo.ibibo.com",expires=str(int(time.time())+21600000))
+	#resp.set_cookie(name,urllib.urlencode(args),path="/",domain=settings.SESSION_COOKIE_DOMAIN,expires=str(int(time.time())+21600000))
 	max_age = 365*24*60*60
-        resp.set_cookie(name,urllib.urlencode(args), max_age=max_age, expires=None, path='/', domain="goibibo.ibibo.com", secure=None)
+        resp.set_cookie(name,urllib.urlencode(args), max_age=max_age, expires=None, path='/', domain=settings.SESSION_COOKIE_DOMAIN, secure=None)
 	return resp
 
 def cookie_signature(parts):

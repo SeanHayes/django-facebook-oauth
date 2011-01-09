@@ -15,6 +15,8 @@ available with this distribution
 
 setting.py
 
+SESSION_COOKIE_DOMAIN = <your domain for cookies>
+
 HOST = <full domain of application: ex "http://www.google.com">
 
 INSTALLED_APPS += (
@@ -33,4 +35,11 @@ FB_PERM = ["publish_stream","offline_access","user_location","user_birthday","em
 http://developers.facebook.com/docs/authentication/permissions)
 
 
+urls.py
+add one url param:
+(r'^fb/', include('fb.urls')),
 
+
+
+site url for facebook app:
+http://<hostname>/fb/fb-auth/
