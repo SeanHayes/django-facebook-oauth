@@ -19,27 +19,22 @@ def fb_auth(request):
 	v_code = request.GET.get('code')
 	APP_ID = settings.FACEBOOK_APP_ID
 	FB_P=settings.FB_PERM
+	next = request.GET['next'] if 'next' in request.GET else '/'
 	
 	if 'fbs_' + APP_ID in request.COOKIES:
 		#logger.debug('fbs_')
 		user = authenticate(cookies=request.COOKIES)
 		if user:
 			login(request, user)
-		return HttpResponseRedirect("/")
+		return HttpResponseRedirect(next)
 	elif(v_code):
 		logger.debug('v_code: %s' % v_code)
 		user = authenticate(verification_code=v_code)
 		if user:
 			login(request, user)
 		access_token = user.facebook.select_related()[0].access_token
-		url = '/'
-		#if request.META.has_key('HTTP_REFERER'):
-			#logger.debug("Referrer: "+request.META['HTTP_REFERER'])
-			#url = urlparse.parse_qs(urlparse.urlparse(request.META['HTTP_REFERER']).query)
-			#url = urlparse.parse_qs(urlparse.urlparse(urlparse.parse_qs(urlparse.urlparse(request.META['HTTP_REFERER']).query)['next'][0]).query)['redirect_uri'][0]
-		#logger.debug("URL:"+str(url))
 		
-		resp=HttpResponseRedirect(url)
+		resp=HttpResponseRedirect(next)
 		#logger.debug('Username: '+user.username)
 		
 		domain = None
