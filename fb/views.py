@@ -14,23 +14,30 @@ def fb_auth(request):
 	v_code = request.GET.get('code')
 	APP_ID = settings.FACEBOOK_APP_ID
 	FB_P=settings.FB_PERM
-
 	if 'fbs_' + APP_ID in request.COOKIES:
 		user = authenticate(cookies=request.COOKIES)
 		if user:
 			login(request, user)
-		return HttpResponseRedirect("/")
+		if(settings.FB_AUTH_REDIRECT):
+			return HttpResponseRedirect(settings.FB_AUTH_REDIRECT)
+		else:
+			return HttpResponseRedirect("/")
 	elif(v_code):
 		user = authenticate(verification_code=v_code)
 		if user:
 			login(request, user)
 		access_token = user.facebook.select_related()[0].access_token
+		'''
 		if request.META.has_key('HTTP_REFERER'):
 			url = request.META['HTTP_REFERER']
 			resp=HttpResponseRedirect(urllib2.unquote(url))
-
 		else:
 			resp=HttpResponseRedirect("http://"+settings.SESSION_COOKIE_DOMAIN)
+		'''
+		if(settings.FB_AUTH_REDIRECT):
+			return HttpResponseRedirect(settings.FB_AUTH_REDIRECT)
+		else:
+			return HttpResponseRedirect("/")
 		if(FB_P.count('offline_access')):
 			resp=set_cookie(resp, "fbs_"+APP_ID, str(user.username),access_token=access_token,expires=time.time() + 30 * 86400)
 		else:

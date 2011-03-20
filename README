@@ -28,6 +28,8 @@ FACEBOOK_API_KEY=
 FACEBOOK_APP_ID=
 FACEBOOK_SECRET_KEY=
 
+FB_AUTH_REDIRECT = "<specify absolute url where client will be redirect after succesfull login, default redirection is  to '/'>"
+
 AUTHENTICATION_BACKENDS =  ('django.contrib.auth.backends.ModelBackend','fb.auth.FbAuth')
 
 FB_PERM = ["publish_stream","offline_access","user_location","user_birthday","email"]
