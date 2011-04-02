@@ -15,6 +15,8 @@ available with this distribution
 
 setting.py
 
+SESSION_COOKIE_DOMAIN = <your domain for cookies>
+
 HOST = <full domain of application: ex "http://www.google.com">
 
 INSTALLED_APPS += (
@@ -26,11 +28,20 @@ FACEBOOK_API_KEY=
 FACEBOOK_APP_ID=
 FACEBOOK_SECRET_KEY=
 
-AUTHENTICATION_BACKENDS =  ('django_facebook_oauth.auth.FbAuth')
+FB_AUTH_REDIRECT = "<specify absolute url path where client will be redirect after succesfull login, default redirection is to '/'>"
+
+AUTHENTICATION_BACKENDS =  ('django.contrib.auth.backends.ModelBackend','fb.auth.FbAuth')
 
 FB_PERM = ["publish_stream","offline_access","user_location","user_birthday","email"]
 (this settings is used to pull various fb extended permissions while authenticating with facebook oauth. please check.
 http://developers.facebook.com/docs/authentication/permissions)
 
 
+urls.py
+add one url param:
+(r'^fb/', include('fb.urls')),
 
+
+
+site url for facebook app:
+http://yourdomain.com/fb/fb-auth/

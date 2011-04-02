@@ -19,7 +19,7 @@ def fb_auth(request):
 	v_code = request.GET.get('code')
 	APP_ID = settings.FACEBOOK_APP_ID
 	FB_P=settings.FB_PERM
-	next = request.GET['next'] if 'next' in request.GET else '/'
+	next = request.GET['next'] if 'next' in request.GET else settings.FB_AUTH_REDIRECT if hasattr(settings, "FB_AUTH_REDIRECT") else '/'
 	
 	if 'fbs_' + APP_ID in request.COOKIES:
 		#logger.debug('fbs_')
@@ -34,21 +34,18 @@ def fb_auth(request):
 			login(request, user)
 		access_token = user.facebook.select_related()[0].access_token
 		
-		resp=HttpResponseRedirect(next)
-		#logger.debug('Username: '+user.username)
+		#if request.META.has_key('HTTP_REFERER'):
+		#	url = request.META['HTTP_REFERER']
+		#	resp=HttpResponseRedirect(urllib2.unquote(url))
+		#else:
+		#	resp=HttpResponseRedirect("http://"+settings.SESSION_COOKIE_DOMAIN)
 		
-		domain = None
-		try:
-			try:
-				from IPy import IP
-				IP(HOST.split(':')[0])
-			except ImportError:
-				pass
-		except Exception as e:
-			logger.error(e)
-			domain = '.'+HOST
-			logger.debug('DOMAIN: '+domain)
-		resp=set_cookie(resp, "fbs_"+APP_ID, str(user.username), access_token=access_token, domain=domain, expires=time.time() + 30 * 86400)
+		resp=HttpResponseRedirect(next)
+		
+		if(FB_P.count('offline_access')):
+			resp=set_cookie(resp, "fbs_"+APP_ID, str(user.username),access_token=access_token,expires=time.time() + 30 * 86400)
+		else:
+			resp=set_cookie(resp, "fbs_"+APP_ID, str(user.username),access_token=access_token,expires=time.time() + 3600)
 		return resp
 	else:
 		#logger.debug('last case')
@@ -77,11 +74,10 @@ def set_cookie(resp, name, value, access_token=None, domain=None, path="/", expi
 			args[arg] = args[arg].encode('utf-8')
 	signature = cookie_signature(args)
 	args['sig'] = signature
-	#logger.debug(args)
 	
-	#resp.set_cookie(name, urllib.urlencode(args), path="/", domain=domain, expires=expires)
+	#resp.set_cookie(name,urllib.urlencode(args),path="/",domain=settings.SESSION_COOKIE_DOMAIN,expires=str(int(time.time())+21600000))
 	max_age = 365*24*60*60
-	resp.set_cookie(name, urllib.urlencode(args), max_age=max_age, expires=None, path='/', domain=domain, secure=None)
+	resp.set_cookie(name,urllib.urlencode(args), max_age=max_age, expires=None, path='/', domain=settings.SESSION_COOKIE_DOMAIN, secure=None)
 	return resp
 
 def cookie_signature(parts):
