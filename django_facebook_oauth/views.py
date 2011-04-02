@@ -15,19 +15,26 @@ import facebook
 
 logger = logging.getLogger(__name__)
 
+cookie_key = 'fbs_' + settings.FACEBOOK_APP_ID
+cookie_path = '/'
+cookie_domain = settings.SESSION_COOKIE_DOMAIN
+
 def fb_auth(request):
 	v_code = request.GET.get('code')
 	APP_ID = settings.FACEBOOK_APP_ID
 	FB_P=settings.FB_PERM
 	next = request.GET['next'] if 'next' in request.GET else settings.FB_AUTH_REDIRECT if hasattr(settings, "FB_AUTH_REDIRECT") else '/'
 	
-	if 'fbs_' + APP_ID in request.COOKIES:
-		#logger.debug('fbs_')
+	if cookie_key in request.COOKIES:
+		logger.debug('cookie value: %s' % request.COOKIES[cookie_key])
 		user = authenticate(cookies=request.COOKIES)
 		if user:
 			login(request, user)
-		return HttpResponseRedirect(next)
-	elif(v_code):
+			return HttpResponseRedirect(next)
+		else:
+			logger.debug("no user was returned")
+	
+	if(v_code):
 		logger.debug('v_code: %s' % v_code)
 		user = authenticate(verification_code=v_code)
 		if user:
@@ -53,8 +60,10 @@ def fb_auth(request):
 		logger.debug(url)
 		perm=",".join(FB_P)
 		args = dict(client_id=APP_ID, redirect_uri=url, scope=perm)
-		return HttpResponseRedirect("https://graph.facebook.com/oauth/authorize?" + urllib.urlencode(args))
-
+		resp = HttpResponseRedirect("https://graph.facebook.com/oauth/authorize?" + urllib.urlencode(args))
+		#it's possible the cookie could be stale
+		resp.delete_cookie(cookie_key, cookie_path, cookie_domain)
+		return resp
 
 def set_cookie(resp, name, value, access_token=None, domain=None, path="/", expires=None):
 	"""Generates and signs a cookie for the give name/value"""
@@ -75,9 +84,9 @@ def set_cookie(resp, name, value, access_token=None, domain=None, path="/", expi
 	signature = cookie_signature(args)
 	args['sig'] = signature
 	
-	#resp.set_cookie(name,urllib.urlencode(args),path="/",domain=settings.SESSION_COOKIE_DOMAIN,expires=str(int(time.time())+21600000))
+	#resp.set_cookie(name,urllib.urlencode(args),path="/",domain=cookie_domain,expires=str(int(time.time())+21600000))
 	max_age = 365*24*60*60
-	resp.set_cookie(name,urllib.urlencode(args), max_age=max_age, expires=None, path='/', domain=settings.SESSION_COOKIE_DOMAIN, secure=None)
+	resp.set_cookie(name,urllib.urlencode(args), max_age=max_age, expires=None, path=cookie_path, domain=cookie_domain, secure=None)
 	return resp
 
 def cookie_signature(parts):
