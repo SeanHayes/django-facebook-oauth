@@ -117,7 +117,7 @@ class FbAuth(ModelBackend):
 			except:
 				email = fb_profile['id'] + '@dummyfbemail.com'
 			
-			username = fb_profile['id']
+			username = fb_profile['name']
 			#we need a unique User created. Otherwise another user might be able
 			#to change his or her username to someone else's FB ID, thereby causing
 			#this script to crash and preventing that FB user from registering.
