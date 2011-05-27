@@ -50,9 +50,9 @@ def fb_auth(request):
 		resp=HttpResponseRedirect(next)
 		
 		if(FB_P.count('offline_access')):
-			resp=set_cookie(resp, "fbs_"+APP_ID, str(user.username),access_token=access_token,expires=time.time() + 30 * 86400)
+			resp=set_cookie(resp, "fbs_"+APP_ID, user.username, access_token=access_token, expires=time.time() + 30 * 86400)
 		else:
-			resp=set_cookie(resp, "fbs_"+APP_ID, str(user.username),access_token=access_token,expires=time.time() + 3600)
+			resp=set_cookie(resp, "fbs_"+APP_ID, user.username, access_token=access_token, expires=time.time() + 3600)
 		return resp
 	else:
 		#logger.debug('last case')
