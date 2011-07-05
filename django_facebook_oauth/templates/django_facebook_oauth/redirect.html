@@ -2,7 +2,7 @@
 
 {% block extra_head %}
 <script type="text/javascript">
-	window.parent.location = '{{ fb_url }}';
+	window.parent.location = '{{ fb_url|safe }}';
 </script>
 {% endblock extra_head %}
 
