@@ -8,6 +8,7 @@ from django.contrib.auth import authenticate, login
 from django.http import HttpResponseRedirect,HttpResponse
 from django.conf import settings
 from django.core.urlresolvers import reverse
+from django.shortcuts import render
 from constants import HOST
 import logging
 import urlparse
@@ -22,8 +23,8 @@ cookie_domain = settings.SESSION_COOKIE_DOMAIN
 def fb_auth(request):
 	v_code = request.GET.get('code')
 	APP_ID = settings.FACEBOOK_APP_ID
-	FB_P=settings.FB_PERM
-	next = request.GET['next'] if 'next' in request.GET else settings.FB_AUTH_REDIRECT if hasattr(settings, "FB_AUTH_REDIRECT") else '/'
+	FB_P = settings.FB_PERM
+	next = settings.FB_AUTH_REDIRECT if hasattr(settings, "FB_AUTH_REDIRECT") else '/'
 	
 	if cookie_key in request.COOKIES:
 		logger.debug('cookie value: %s' % request.COOKIES[cookie_key])
@@ -60,7 +61,12 @@ def fb_auth(request):
 		logger.debug(url)
 		perm=",".join(FB_P)
 		args = dict(client_id=APP_ID, redirect_uri=url, scope=perm)
-		resp = HttpResponseRedirect("https://graph.facebook.com/oauth/authorize?" + urllib.urlencode(args))
+		fb_url = "https://graph.facebook.com/oauth/authorize?" + urllib.urlencode(args)
+		
+		if settings.FB_AUTH_REDIRECT_PAGE if hasattr(settings, "FB_AUTH_REDIRECT_PAGE") else False:
+			resp = render(request, 'django_facebook_oauth/redirect.html', {'fb_url': fb_url})
+		else:
+			resp = HttpResponseRedirect(fb_url)
 		#it's possible the cookie could be stale
 		resp.delete_cookie(cookie_key, cookie_path, cookie_domain)
 		return resp

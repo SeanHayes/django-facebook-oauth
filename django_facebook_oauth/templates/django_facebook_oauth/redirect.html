@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block extra_head %}
+<script type="text/javascript">
+	window.parent.location = '{{ fb_url }}';
+</script>
+{% endblock extra_head %}
+
+{% block content %}
+		You must <a target="_top" href="{{ fb_url }}">authorize this application</a> in order to proceed.
+{% endblock content %}
+
