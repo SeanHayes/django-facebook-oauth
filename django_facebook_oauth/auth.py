@@ -26,10 +26,15 @@ class FbAuth(ModelBackend):
 	Use the login name, and a hash of the password. For example:
 	"""
 	
-	def authenticate(self, verification_code=None, cookies=[]):
+	def authenticate(self, verification_code=None, uid=None, cookies=[]):
 		access_token = None
 		fb_profile = None
-		if(cookies):
+		if uid:
+			try:
+				return User.objects.select_related('facebook').get(facebook__uid=uid)
+			except:
+				pass
+		elif(cookies):
 			access_token = facebook.get_user_from_cookie(cookies, APP_ID, APP_SECRET)
 			if 'fbs_' + APP_ID in cookies and datetime.fromtimestamp(float(access_token['expires'])) > datetime.now():
 				graph = facebook.GraphAPI(access_token['access_token'])
