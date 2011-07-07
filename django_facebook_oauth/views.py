@@ -40,7 +40,7 @@ def fb_auth(request):
 		user = authenticate(verification_code=v_code)
 		if user:
 			login(request, user)
-		access_token = user.facebook.select_related()[0].access_token
+		access_token = user.facebook.access_token
 		
 		#if request.META.has_key('HTTP_REFERER'):
 		#	url = request.META['HTTP_REFERER']
